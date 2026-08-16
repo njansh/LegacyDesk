@@ -1,0 +1,778 @@
+# Milestone: MVP 1 — Sistema de Gestão de Serviços
+
+**Objetivo:** criar um sistema de gestão de solicitações utilizado por funcionários de uma empresa, permitindo registrar clientes, abrir solicitações, atribuir técnicos, acompanhar o atendimento e manter histórico e auditoria.
+
+**Restrições do projeto:**
+
+* Java 8
+* Spring Boot 2.7.x
+* Maven
+* PostgreSQL
+* Docker
+* API REST
+* arquitetura modular
+* sem utilizar recursos exclusivos de versões modernas do Java
+* resolver problemas modernos utilizando ferramentas disponíveis nessa stack
+
+---
+
+# 1. Planejamento e arquitetura
+
+### #1 Definir domínio do sistema
+
+**Acceptance Criteria**
+
+* entidades principais identificadas;
+* responsabilidades identificadas;
+* relações entre entidades documentadas;
+* regras principais documentadas.
+
+---
+
+### #2 Definir arquitetura do backend
+
+**Acceptance Criteria**
+
+* módulos definidos;
+* responsabilidades de cada camada definidas;
+* domínio isolado da infraestrutura;
+* regras de negócio fora dos controllers;
+* estratégia de persistência definida.
+
+---
+
+### #3 Setup Spring Boot legado
+
+**Acceptance Criteria**
+
+* Java 8;
+* Spring Boot 2.7.x;
+* Maven;
+* aplicação inicia;
+* testes básicos executam.
+
+---
+
+### #4 Configurar Docker e PostgreSQL
+
+**Acceptance Criteria**
+
+* PostgreSQL executando via Docker Compose;
+* aplicação conectada ao banco;
+* configuração externa ao código;
+* aplicação inicia corretamente.
+
+---
+
+# 2. Banco de dados
+
+### #5 Configurar Flyway
+
+**Acceptance Criteria**
+
+* migrations versionadas;
+* banco criado através das migrations;
+* aplicação executa migrations automaticamente.
+
+---
+
+### #6 Definir estratégia de auditoria
+
+Precisamos decidir quais ações serão registradas e quais informações serão armazenadas.
+
+---
+
+# 3. Autenticação
+
+### #7 Criar entidade User
+
+Campos iniciais:
+
+* id
+* name
+* email
+* password
+* role
+* active
+* createdAt
+* updatedAt
+
+---
+
+### #8 Criar migration de usuários
+
+---
+
+### #9 Implementar cadastro
+
+**Acceptance Criteria**
+
+* email único;
+* senha armazenada de forma segura;
+* usuário criado como ativo;
+* role inicial definida pelo sistema;
+* usuário não pode escolher uma função administrativa durante o cadastro.
+
+---
+
+### #10 Implementar login
+
+**Acceptance Criteria**
+
+* autenticação;
+* credenciais inválidas tratadas corretamente;
+* mecanismo de autenticação definido;
+* sessão/token não expõe informações sensíveis.
+
+---
+
+### #11 Implementar logout
+
+---
+
+### #12 Implementar usuário atual
+
+```http
+GET /me
+```
+
+---
+
+# 4. Autorização
+
+### #13 Criar sistema de roles
+
+```text
+ATTENDANT
+TECHNICIAN
+SUPERVISOR
+ADMIN
+```
+
+---
+
+### #14 Implementar autorização por função
+
+O sistema deve impedir acesso a funcionalidades incompatíveis com a função do usuário.
+
+Isso é particularmente importante porque **autenticação não significa autorização**. A OWASP classifica autorização quebrada em nível de objeto e de função entre os principais riscos de APIs. ([Guia do Desenvolvedor OWASP][2])
+
+---
+
+### #15 Implementar controle de acesso por recurso
+
+Não basta verificar:
+
+> "o usuário está logado?"
+
+Também precisamos verificar:
+
+> "esse usuário pode acessar **este recurso específico**?"
+
+Exemplo:
+
+```text
+GET /requests/123
+```
+
+O fato de o usuário conseguir acessar `/requests/123` não significa automaticamente que ele pode visualizar aquela solicitação.
+
+Isso nos coloca diretamente diante de BOLA/IDOR. ([OWASP][3])
+
+---
+
+# 5. Clientes
+
+### #16 Criar entidade Customer
+
+Campos iniciais:
+
+* id
+* name
+* document
+* email
+* phone
+* active
+* createdAt
+* updatedAt
+
+---
+
+### #17 Criar migration de clientes
+
+---
+
+### #18 Implementar cadastro de cliente
+
+---
+
+### #19 Implementar consulta de cliente
+
+---
+
+### #20 Implementar listagem de clientes
+
+---
+
+### #21 Implementar atualização de cliente
+
+---
+
+### #22 Implementar desativação de cliente
+
+**Importante:** não apagar fisicamente o cliente.
+
+---
+
+# 6. Funcionários
+
+### #23 Implementar gerenciamento de funcionários
+
+O administrador poderá:
+
+* criar;
+* consultar;
+* listar;
+* atualizar;
+* alterar função;
+* desativar.
+
+---
+
+### #24 Impedir acesso de funcionários desativados
+
+Um funcionário desativado não pode continuar utilizando o sistema.
+
+---
+
+# 7. Solicitações
+
+### #25 Criar entidade Request
+
+Campos:
+
+* id
+* customer
+* description
+* priority
+* status
+* assignedTechnician
+* createdAt
+* updatedAt
+* resolvedAt
+
+---
+
+### #26 Criar migration de solicitações
+
+---
+
+### #27 Criar enum de prioridade
+
+```text
+LOW
+NORMAL
+HIGH
+URGENT
+```
+
+---
+
+### #28 Criar enum de status
+
+```text
+OPEN
+IN_PROGRESS
+WAITING_CUSTOMER
+RESOLVED
+CANCELLED
+```
+
+---
+
+### #29 Criar solicitação
+
+---
+
+### #30 Consultar solicitação
+
+---
+
+### #31 Listar solicitações
+
+---
+
+### #32 Implementar filtros
+
+Filtros por:
+
+* status;
+* prioridade;
+* cliente;
+* técnico;
+* período.
+
+---
+
+### #33 Implementar paginação
+
+O endpoint não deve retornar todos os registros de uma vez.
+
+---
+
+# 8. Workflow
+
+### #34 Implementar atribuição de técnico
+
+Supervisor poderá atribuir uma solicitação a um técnico.
+
+---
+
+### #35 Implementar transições de status
+
+As mudanças devem respeitar as regras do domínio.
+
+---
+
+### #36 Validar transições inválidas
+
+Exemplo:
+
+```text
+OPEN
+ ↓
+IN_PROGRESS
+ ↓
+WAITING_CUSTOMER
+ ↓
+IN_PROGRESS
+ ↓
+RESOLVED
+```
+
+O sistema deve impedir transições que não façam sentido.
+
+---
+
+# 9. Comentários
+
+### #37 Criar entidade Comment
+
+Uma solicitação poderá possuir vários comentários.
+
+---
+
+### #38 Implementar comentários
+
+* criar;
+* consultar;
+* listar.
+
+Comentários não devem ser sobrescritos.
+
+---
+
+# 10. Histórico
+
+### #39 Criar histórico da solicitação
+
+Registrar eventos importantes:
+
+```text
+criação
+atribuição
+alteração de status
+alteração de prioridade
+resolução
+cancelamento
+```
+
+---
+
+### #40 Consultar histórico
+
+---
+
+# 11. Auditoria
+
+### #41 Implementar auditoria de ações sensíveis
+
+Registrar:
+
+```text
+quem
+fez o quê
+quando
+em qual recurso
+```
+
+Exemplo conceitual:
+
+```text
+USER 42
+ALTEROU STATUS
+REQUEST 152
+OPEN -> IN_PROGRESS
+2026-08-16 15:42
+```
+
+---
+
+# 12. Segurança e vazamento de dados
+
+Aqui eu colocaria uma **milestone própria**, porque é uma parte importante do nosso exercício.
+
+### #42 Definir dados sensíveis
+
+Identificar quais informações:
+
+* podem ser retornadas;
+* precisam de autorização;
+* nunca devem aparecer na API;
+* nunca devem aparecer nos logs.
+
+---
+
+### #43 Implementar proteção contra exposição excessiva
+
+As respostas da API não devem simplesmente serializar entidades inteiras.
+
+Precisamos retornar **somente o necessário para aquele contexto**.
+
+A OWASP chama atenção especificamente para esse problema: APIs que retornam propriedades além das necessárias podem expor PII, tokens, identificadores internos e outras informações sensíveis. ([OWASP][4])
+
+---
+
+### #44 Implementar proteção contra Mass Assignment
+
+O cliente não poderá enviar propriedades que não deveria controlar.
+
+Por exemplo, uma requisição de atualização não pode simplesmente permitir que alguém envie:
+
+```text
+role=ADMIN
+```
+
+ou alguma propriedade interna equivalente.
+
+---
+
+### #45 Revisar mensagens de erro
+
+Erros não devem revelar:
+
+* stack trace;
+* SQL;
+* estrutura interna;
+* credenciais;
+* tokens;
+* informações desnecessárias do banco.
+
+---
+
+### #46 Revisar logs
+
+Garantir que informações sensíveis não sejam registradas.
+
+---
+
+### #47 Testar vazamento de dados
+
+Criar testes tentando descobrir se:
+
+* um funcionário consegue acessar dados indevidos;
+* um usuário consegue acessar outro recurso;
+* uma resposta contém campos sensíveis;
+* propriedades internas podem ser alteradas;
+* erros revelam informações internas;
+* logs armazenam dados que não deveriam.
+
+Isso vai transformar segurança em algo que você **tenta quebrar**, e não simplesmente uma configuração. A OWASP inclusive trata testes de acesso cruzado entre identidades como uma forma importante de verificar autorização em nível de objeto. ([OWASP][5])
+
+---
+
+# 13. Integração com sistema legado
+
+### #48 Criar cliente para sistema legado
+
+O sistema externo será tratado como uma dependência não confiável.
+
+---
+
+### #49 Implementar consulta ao sistema legado
+
+Exemplo:
+
+```text
+consultar cliente pelo documento
+```
+
+---
+
+### #50 Tratar indisponibilidade do sistema legado
+
+O sistema externo pode:
+
+* estar fora do ar;
+* responder lentamente;
+* retornar erro;
+* retornar dados inválidos.
+
+Nossa aplicação não deve simplesmente quebrar.
+
+---
+
+# 14. Processamento assíncrono
+
+### #51 Implementar operação assíncrona
+
+Uma operação que não precisa bloquear a criação da solicitação deverá ser executada de forma assíncrona.
+
+E aqui temos uma restrição interessante:
+
+**não quero que você resolva isso automaticamente com uma API moderna.**
+
+Java 8 possui suas próprias ferramentas de concorrência, então você terá que entender o problema antes de escolher a solução.
+
+---
+
+### #52 Tratar falhas do processamento assíncrono
+
+Precisamos descobrir:
+
+> O que acontece se a operação assíncrona falhar?
+
+Não podemos simplesmente ignorar a exceção.
+
+---
+
+# 15. Idempotência
+
+### #53 Identificar requisições duplicadas
+
+Precisamos impedir que uma mesma operação enviada duas vezes provoque efeitos duplicados.
+
+Exemplo:
+
+```text
+POST /requests
+```
+
+O cliente envia duas vezes por causa de uma falha de rede.
+
+O sistema deve conseguir reconhecer que aquilo representa a mesma operação.
+
+---
+
+### #54 Testar idempotência
+
+Testar:
+
+* requisição repetida;
+* timeout;
+* retry;
+* envio simultâneo.
+
+---
+
+# 16. Relatórios
+
+### #55 Relatório de solicitações
+
+Permitir consultar:
+
+* quantidade por status;
+* quantidade por prioridade;
+* solicitações por técnico;
+* solicitações por período.
+
+---
+
+### #56 Relatório de desempenho
+
+Calcular:
+
+* tempo médio de resolução;
+* quantidade resolvida;
+* quantidade cancelada;
+* solicitações pendentes.
+
+**Sem dashboard.**
+
+A API fornece os dados.
+
+---
+
+# 17. Tratamento de erros
+
+### #57 Criar exceções de domínio
+
+Exemplos:
+
+```text
+UserNotFoundException
+CustomerNotFoundException
+RequestNotFoundException
+InvalidStatusTransitionException
+UnauthorizedActionException
+```
+
+---
+
+### #58 Criar tratamento global de exceções
+
+Padronizar respostas:
+
+```text
+400
+401
+403
+404
+409
+500
+```
+
+---
+
+# 18. Testes
+
+### #59 Testes unitários de autenticação
+
+---
+
+### #60 Testes unitários de autorização
+
+---
+
+### #61 Testes das regras de negócio
+
+---
+
+### #62 Testes de clientes
+
+---
+
+### #63 Testes de solicitações
+
+---
+
+### #64 Testes de workflow
+
+---
+
+### #65 Testes de idempotência
+
+---
+
+### #66 Testes de segurança
+
+Principalmente:
+
+* acesso horizontal;
+* acesso vertical;
+* exposição de propriedades;
+* Mass Assignment;
+* acesso sem autenticação.
+
+---
+
+### #67 Testes de integração
+
+Banco + aplicação.
+
+---
+
+### #68 Testes dos controllers
+
+---
+
+# 19. Documentação
+
+### #69 Configurar Swagger/OpenAPI
+
+---
+
+### #70 Documentar API
+
+---
+
+### #71 Documentar arquitetura
+
+---
+
+### #72 Documentar decisões técnicas
+
+Aqui vamos registrar **por que** escolhemos determinada solução, especialmente quando uma solução moderna seria mais simples, mas está proibida pela restrição do projeto.
+
+---
+
+### #73 Criar README
+
+---
+
+# 20. Hardening
+
+### #74 Revisão de segurança
+
+---
+
+### #75 Revisão de performance
+
+Verificar:
+
+* consultas;
+* índices;
+* paginação;
+* N+1;
+* volume de dados.
+
+---
+
+### #76 Revisão de concorrência
+
+Verificar:
+
+* operações simultâneas;
+* atualização simultânea;
+* idempotência;
+* processamento assíncrono.
+
+---
+
+### #77 Revisão de código
+
+---
+
+### #78 Refatoração
+
+---
+
+### #79 Verificar cobertura de testes
+
+---
+
+# 21. Release
+
+### #80 MVP 1.0
+
+**Definition of Done**
+
+* [ ] autenticação funcionando;
+* [ ] autorização funcionando;
+* [ ] clientes funcionando;
+* [ ] funcionários funcionando;
+* [ ] solicitações funcionando;
+* [ ] workflow funcionando;
+* [ ] comentários funcionando;
+* [ ] histórico funcionando;
+* [ ] auditoria funcionando;
+* [ ] proteção contra vazamento testada;
+* [ ] integração com sistema legado funcionando;
+* [ ] processamento assíncrono funcionando;
+* [ ] idempotência implementada;
+* [ ] testes passando;
+* [ ] documentação pronta;
+* [ ] Swagger funcionando;
+* [ ] aplicação executando com Docker;
+* [ ] nenhuma informação sensível versionada.
+
