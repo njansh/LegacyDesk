@@ -1,10 +1,3 @@
-Sim. O próximo documento é o **`PROJECT_OVERVIEW.md`**.
-
-Ele será a apresentação oficial do projeto: alguém que entrar no repositório deve conseguir ler esse arquivo e entender **o que é o LegacyDesk, qual problema ele resolve, para quem existe e quais são os limites do projeto**, sem precisar abrir as issues.
-
-Eu sugiro deixá-lo assim:
-
-````md
 # LegacyDesk
 
 ## Service Management Platform
