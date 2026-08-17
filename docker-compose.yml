@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: legacydesk-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: legacydesk_db
+      POSTGRES_USER: legacydesk_user
+      POSTGRES_PASSWORD: legacydesk_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U legacydesk_user -d legacydesk_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
+    driver: local
