@@ -30,6 +30,13 @@ public class UserTest {
             assertNotNull(result.getCreatedAt());
             assertNotNull(result.getUpdatedAt());
         }
+        @Test
+        @DisplayName("Should throw exception when name exceeds 100 characters")
+        void shouldThrowExceptionForLongName() {
+            String longName = "This name is intentionally created to exceed the maximum allowed length of one hundred characters in total";
+            assertThrows(IllegalArgumentException.class,
+                    () -> User.createNew(longName, "johndoe@example.com", "password123", Role.ATTENDANT));
+        }
 
         @Test
         @DisplayName("Should throw exception when email format is invalid")
