@@ -8,7 +8,7 @@ Crie o arquivo **`docs/domain-models.md`** dentro da pasta `docs/` com o conteú
 ### 1.1 User
 Represents internal company employees interacting with the service desk.
 * **Fields:**
-  * `id` (UUID, PK)
+  * `id` (Long, PK)
   * `name` (String, required, max 100)
   * `email` (String, required, unique, validated)
   * `password` (String, required, hashed via BCrypt)
@@ -20,7 +20,7 @@ Represents internal company employees interacting with the service desk.
 ### 1.2 Customer
 Represents external clients requesting services.
 * **Fields:**
-  * `id` (UUID, PK)
+  * `id` (Long, PK)
   * `name` (String, required, max 120)
   * `document` (String, required, unique, tax/company ID)
   * `email` (String, required)
@@ -32,7 +32,7 @@ Represents external clients requesting services.
 ### 1.3 Request
 Represents a customer support/service ticket.
 * **Fields:**
-  * `id` (UUID, PK)
+  * `id` (Long, PK)
   * `customer` (Customer reference, required)
   * `assignedTechnician` (User reference, optional, must have `TECHNICIAN` role)
   * `description` (String, required, max 2000)
@@ -45,7 +45,7 @@ Represents a customer support/service ticket.
 ### 1.4 Comment
 Represents chronological communication and technical notes within a request.
 * **Fields:**
-  * `id` (UUID, PK)
+  * `id` (Long, PK)
   * `request` (Request reference, required)
   * `author` (User reference, required)
   * `content` (String, required, max 1000)
@@ -54,8 +54,8 @@ Represents chronological communication and technical notes within a request.
 ### 1.5 RequestHistory
 Immutable timeline recording all state changes and key transitions.
 * **Fields:**
-  * `id` (UUID, PK)
-  * `requestId` (UUID, required)
+  * `id` (Long, PK)
+  * `requestId` (Long, required)
   * `operatorId` (Long, required)
   * `eventType` (EventType enum: `CREATED`, `ASSIGNED`, `STATUS_CHANGED`, `PRIORITY_CHANGED`, `RESOLVED`, `CANCELLED`)
   * `previousValue` (String, nullable)
@@ -65,8 +65,8 @@ Immutable timeline recording all state changes and key transitions.
 ### 1.6 AuditEvent
 System-level security audit trail recording critical mutations.
 * **Fields:**
-  * `id` (UUID, PK)
-  * `operatorId` (UUID, required)
+  * `id` (Long, PK)
+  * `operatorId` (Long, required)
   * `action` (String, required)
   * `resourceType` (String, required)
   * `resourceId` (String, required)
