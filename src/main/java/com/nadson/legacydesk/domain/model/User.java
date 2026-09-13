@@ -48,8 +48,11 @@ public class User {
     }
 
     private static String validateName(String name) {
-        if (name == null || name.trim().isEmpty()) {
+        if (name == null || name.trim().isEmpty() ) {
             throw new IllegalArgumentException("name can't be null or blank");
+        }
+        if (name.trim().length() > 100) {
+            throw new IllegalArgumentException("name must have at most 100 characters");
         }
         return name.trim();
     }
